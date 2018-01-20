@@ -3,8 +3,6 @@
 #include "Eigen/Dense"
 #include <iostream>
 
-#define epsilon	0.000001
-
 using namespace std;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -39,20 +37,6 @@ FusionEKF::FusionEKF() {
     * Set the process and measurement noises
   */
 
-  /* It comes from lecture 11.
-     x, y and each displacement, velocity and there are no Z.
-   */
-
-#if 0
-  H_laser_ << 1, 0, 0, 0,
-                0, 1, 0, 0;
-#endif
-
-  /* It comes from lecture 18.
-     partial derivative of velocity is 0.
-  Hj_ << 1, 1, 0, 0,
-        1, 1, 0, 0,
-        1, 1, 1, 1; */
 
 }
 
@@ -77,25 +61,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // first measurement
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
-    // ekf_.x_ << 1, 1, 1, 1;
+    ekf_.x_ << 1, 1, 1, 1;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
       */
-      // range
-      float rho = measurement_pack.raw_measurements_[0];
-      // bearing
-      float phi = measurement_pack.raw_measurements_[1];
-      // range rate
-      float rho_dot = measurement_pack.raw_measurements_[2];
-
-      // polar 2 cartesian
-      float x = rho * cos(phi);
-      float y = rho * sin(phi);
-      float vx = rho_dot * cos(phi);
-      float vy = rho_dot * sin(phi);
-      ekf_.x_ << x, y, vx, vy;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
