@@ -3,7 +3,7 @@
 #include "Eigen/Dense"
 #include <iostream>
 
-#define epsilon	0.000001
+#define EPSILON	0.000001
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -101,7 +101,28 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       /**
       Initialize state.
       */
+
+      ekf_.x_ << measurement_pack.raw_measurements_[0],
+		measurement_pack.raw_measurements_[1],
+		0,
+		0;
     }
+
+    if(fabs(ekf_.x_(0)) < EPSILON && fabs(ekf_.x_(1)) < EPSILON)
+    {
+      ekf_.x_(0) = EPSILON;
+      ekf_.x_(1) = EPSILON;
+    }
+
+    ekf_.P_ = MatrixXd(4, 4);
+    ekf_.P_ << 1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1000, 0,
+		0, 0, 0, 1000;
+
+    cout << ekf_.x_ << endl;
+
+    prervious_timestampe_ = measurement_pack.timestamp_;
 
     // done initializing, no need to predict or update
     is_initialized_ = true;
@@ -118,6 +139,19 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       - Time is measured in seconds.
      * Update the process noise covariance matrix.
      * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
+   */
+
+  // Discrete Time - Sampling Time at Digital Signal Processing
+  // Computer can't calculate calculus.
+  // (It's not continuous)
+  // So we need to use these DSP numerical method.
+  float dt = (measurement_pack.timestamp_ - previous_timestamp_);
+  // We want to use dt to us(micro seconds).
+  // And first case of dt will 0.
+  dt /= 1000000.0;
+  previous_timestamp_ = measurement_pack.timestamp_;
+
+  /* It comes from lecture 8 - F Matrix - and lecture 9 - Q Matrix.
    */
 
   ekf_.Predict();
