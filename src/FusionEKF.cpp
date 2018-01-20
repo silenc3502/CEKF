@@ -148,11 +148,29 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   float dt = (measurement_pack.timestamp_ - previous_timestamp_);
   // We want to use dt to us(micro seconds).
   // And first case of dt will 0.
-  dt /= 1000000.0;
+  dt /= pow(10.0, 6);
   previous_timestamp_ = measurement_pack.timestamp_;
 
   /* It comes from lecture 8 - F Matrix - and lecture 9 - Q Matrix.
    */
+  ekf_.F_ = MatrixXd(4, 4);
+  ekf_.F_ << 1, 0, dt, 0,
+		0, 1, 0, dt,
+		0, 0, 1, 0,
+		0, 0, 0, 1;
+
+  float noise_ax = 9.0;
+  float noise_ay = 9.0;
+
+  float dt2 = pow(dt, 2);
+  float dt3_div2 = pow(dt, 3) / 2;
+  float dt4_div4 = pod(dt, 4) / 4;
+
+  ekf_.Q_ = MatrixXd(4, 4);
+  ekf_.Q_ = dt4_div4 * noise_ax, 0, dt3_div2 * noise_ax, 0,
+		0, dt4_div4 * noise_ay, 0, dt3_div2 * noise_ay,
+		dt3_div2 * noise_ax, 0, dt2 * noise_ax, 0,
+		0, dt3_div2 * noise_ay, 0, dt2 * noise_ay;
 
   ekf_.Predict();
 
