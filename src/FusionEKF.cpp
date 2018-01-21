@@ -3,7 +3,7 @@
 #include "Eigen/Dense"
 #include <iostream>
 
-#define EPSILON	0.000001
+#define EPSILON	0.0001
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -43,7 +43,7 @@ FusionEKF::FusionEKF() {
      x, y and each displacement, velocity and there are no Z.
    */
 
-#if 0
+#if 1
   H_laser_ << 1, 0, 0, 0,
                 0, 1, 0, 0;
 #endif
@@ -77,7 +77,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // first measurement
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
-    // ekf_.x_ << 1, 1, 1, 1;
+    ekf_.x_ << 1, 1, 1, 1;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
@@ -93,9 +93,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       // polar 2 cartesian
       float x = rho * cos(phi);
       float y = rho * sin(phi);
-      float vx = rho_dot * cos(phi);
-      float vy = rho_dot * sin(phi);
-      ekf_.x_ << x, y, vx, vy;
+      ekf_.x_ << x, y, 0, 0;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
@@ -108,11 +106,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		0;
     }
 
+#if 0
     if(fabs(ekf_.x_(0)) < EPSILON && fabs(ekf_.x_(1)) < EPSILON)
     {
       ekf_.x_(0) = EPSILON;
       ekf_.x_(1) = EPSILON;
     }
+#endif
 
     ekf_.P_ = MatrixXd(4, 4);
     ekf_.P_ << 1, 0, 0, 0,
@@ -167,10 +167,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   float dt4_div4 = pow(dt, 4) / 4;
 
   ekf_.Q_ = MatrixXd(4, 4);
-  ekf_.Q_ << dt4_div4 * noise_ax, 0, dt3_div2 * noise_ax, 0,
-		0, dt4_div4 * noise_ay, 0, dt3_div2 * noise_ay,
-		dt3_div2 * noise_ax, 0, dt2 * noise_ax, 0,
-		0, dt3_div2 * noise_ay, 0, dt2 * noise_ay;
+  ekf_.Q_ << dt4_div4 * noise_ax,	0,	dt3_div2 * noise_ax,	0,
+		0,	dt4_div4 * noise_ay,	0,	dt3_div2 * noise_ay,
+		dt3_div2 * noise_ax,	0,	dt2 * noise_ax,		0,
+		0, 	dt3_div2 * noise_ay, 	0, 	dt2 * noise_ay;
 
   ekf_.Predict();
 

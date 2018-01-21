@@ -1,12 +1,7 @@
 #include <iostream>
 #include "tools.h"
 
-#define EPSILON		0.000001
-#define EPSILON2	do	\
-{				\
-	pow(EPSILON, 2)		\
-}				\
-while(0)
+#define EPSILON		0.0001
 
 using Eigen::VectorXd;
 using Eigen::MatrixXd;
@@ -33,7 +28,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
     return rmse;
   }
 
-  if(estimation.size() != ground_truth.size())
+  if(estimations.size() != ground_truth.size())
   {
     cout << "Invalid estimation or ground truth. Data should have the same size" << endl;
     return rmse;
@@ -73,8 +68,8 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 
   float c1 = pow(px, 2) + pow(py, 2);
 
-  if(fabs(c1) < EPSILON2)
-    c1 = EPSILON2;
+  if(fabs(c1) < pow(EPSILON, 2))
+    c1 = pow(EPSILON, 2);
 
   float c2 = sqrt(c1);
   float c3 = (c1 * c2);
