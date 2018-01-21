@@ -61,6 +61,22 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   */
 
   /* It comes from lecture 20 EKF Equations */
+  float px, py, vx, vy;
+  px = x_[0];
+  py = x_[1];
+  vx = x_[2];
+  vy = x_[3];
+
+  float rho, phi, rho_dot;
+  rho = sqrt(pow(px, 2) + pow(py, 2));
+
+  if(rho < 0.000001)
+    rho = 0.000001;
+
+  phi = atan2(py, px);
+  rho_dot = (px * vx + py * vy) / rho;
+
+#if 0
   double rho = sqrt(pow(x_(0), 2) + pow(x_(1), 2));
   double theta = atan(x_(1) / x_(0));
 
@@ -68,9 +84,10 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     rho = pow(EPSILON, 2);
 
   double rho_dot = (x_(0) * x_(2) + x_(1) * x_(3)) / rho;
+#endif
 
   VectorXd h = VectorXd(3);
-  h << rho, theta, rho_dot;
+  h << rho, phi, rho_dot;
 
   VectorXd y = z - h;
 

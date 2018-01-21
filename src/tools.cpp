@@ -59,24 +59,21 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   float vy = x_state(3);
 
   MatrixXd Hj(3, 4);
-
-  if(fabs(px) < EPSILON && fabs(py) < EPSILON)
-  {
-    px = EPSILON;
-    py = EPSILON;
-  }
+  Hj << 0, 0, 0, 0,
+	0, 0, 0, 0,
+	0, 0, 0, 0;
 
   float c1 = pow(px, 2) + pow(py, 2);
 
-  if(fabs(c1) < pow(EPSILON, 2))
-    c1 = pow(EPSILON, 2);
+  if(fabs(c1) < EPSILON)
+    return Hj;
 
   float c2 = sqrt(c1);
   float c3 = (c1 * c2);
 
-  Hj << (px / c2), (py / c2), 0, 0,
-	-(py / c1), (px / c1), 0, 0,
-	py * (vx * py - vy * px) / c3, px * (px * vy - py * vx) / c3, px / c2, py / c2;
+  Hj << (px / c2), 			(py / c2), 			0, 		0,
+	-(py / c1), 			(px / c1), 			0, 		0,
+	py * (vx * py - vy * px) / c3, 	px * (px * vy - py * vx) / c3,	px / c2, 	py / c2;
 
   return Hj;
 }
